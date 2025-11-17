@@ -5,65 +5,203 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Bot d'Échecs Insolent</title>
 <style>
-:root{--bg:#111;--panel:#1e1e1e;--muted:#bfc3c6}
-html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:Inter, system-ui, Arial}
-.container{max-width:980px;margin:0 auto;padding:28px;display:flex;gap:28px;align-items:flex-start;justify-content:center}
-.left{width:420px}
-h1{font-size:28px;margin:0 0 12px;text-align:center}
-#board{width:100%;box-shadow:0 6px 18px rgba(0,0,0,0.6);border-radius:8px;background:#222;padding:12px}
-.panel{background:var(--panel);padding:14px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,0.5)}
-#bot-chat{min-height:120px;padding:14px;border-radius:8px;background:#2a2a2a;color:var(--muted);font-size:15px}
-.controls{display:flex;gap:8px;margin-top:12px}
-button{background:#3b82f6;border:0;padding:8px 12px;border-radius:8px;color:#fff;cursor:pointer}
-button.secondary{background:#6b7280}
-.right{flex:1}
-pre{white-space:pre-wrap;word-break:break-word}
-footer{text-align:center;color:#9aa0a6;margin-top:28px;font-size:13px}
+* { box-sizing: border-box; }
+:root{--bg:#0f1419;--panel:#1e1e1e;--muted:#bfc3c6}
+html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:'Segoe UI', system-ui, Arial}
+body { padding: 20px; }
 
-/* Chessboard styles */
-.chessboard{position:relative;user-select:none;width:100%;aspect-ratio:1}
-.chessboard-squares{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:100%;height:100%}
-.square{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:48px;cursor:pointer}
+h1{font-size:32px;margin:0 0 24px;text-align:center;font-weight:600}
+
+.container{
+  max-width:1100px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns: 500px 1fr;
+  gap:24px;
+  align-items:start;
+}
+
+.left{width:100%}
+
+#board-container{
+  width:500px;
+  height:500px;
+  background:#222;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.7);
+}
+
+.chessboard{
+  width:100%;
+  height:100%;
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  grid-template-rows:repeat(8,1fr);
+  border:2px solid #444;
+  border-radius:4px;
+  overflow:hidden;
+}
+
+.square{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:52px;
+  cursor:pointer;
+  user-select:none;
+  transition:background 0.15s;
+  position:relative;
+}
+
 .square.light{background:#f0d9b5}
 .square.dark{background:#b58863}
-.square.highlight{background:#cdd26a!important}
+.square.highlight{background:#baca44!important}
+.square.selected{background:#829769!important}
+.square:hover{opacity:0.85}
 
-@media(max-width:880px){.container{flex-direction:column;align-items:center}.left{width:320px}}
+.controls{
+  display:flex;
+  gap:10px;
+  margin-top:16px;
+  flex-wrap:wrap;
+}
+
+button{
+  background:#3b82f6;
+  border:0;
+  padding:10px 18px;
+  border-radius:8px;
+  color:#fff;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:500;
+  transition:background 0.2s;
+}
+button:hover{background:#2563eb}
+button.secondary{background:#4b5563}
+button.secondary:hover{background:#374151}
+
+.right{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.panel{
+  background:var(--panel);
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.5);
+}
+
+#bot-chat{
+  min-height:100px;
+  padding:16px;
+  border-radius:8px;
+  background:#2a2a2a;
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.6;
+  border-left:4px solid #3b82f6;
+}
+
+.level-control{
+  margin-top:16px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
+.level-control label{
+  color:#bfc3c6;
+  font-weight:500;
+}
+
+.level-control select{
+  background:#374151;
+  color:#fff;
+  border:1px solid #4b5563;
+  padding:8px 12px;
+  border-radius:6px;
+  font-size:14px;
+  cursor:pointer;
+}
+
+h3{
+  margin:0 0 12px;
+  font-size:18px;
+  font-weight:600;
+}
+
+#history{
+  white-space:pre-wrap;
+  word-break:break-word;
+  background:#2a2a2a;
+  padding:16px;
+  border-radius:8px;
+  font-size:14px;
+  line-height:1.8;
+  font-family:'Courier New', monospace;
+  max-height:300px;
+  overflow-y:auto;
+}
+
+footer{
+  text-align:center;
+  color:#6b7280;
+  margin-top:32px;
+  font-size:14px;
+}
+
+@media(max-width:900px){
+  .container{
+    grid-template-columns:1fr;
+    max-width:500px;
+  }
+  #board-container{
+    width:100%;
+    height:auto;
+    aspect-ratio:1;
+  }
+}
 </style>
 </head>
 <body>
-<h1 style="text-align:center;margin-top:14px">Bot d'Échecs Insolent</h1>
+<h1>♟️ Bot d'Échecs Insolent</h1>
 <div class="container">
-<div class="left">
-<div id="board" class="panel">
-<div class="chessboard">
-<div class="chessboard-squares" id="chessboard-squares"></div>
-</div>
-</div>
-<div class="controls">
-<button id="newBtn">Nouvelle partie</button>
-<button id="undoBtn" class="secondary">Annuler coup</button>
-<button id="flipBtn" class="secondary">Retourner</button>
-</div>
-</div>
-<div class="right">
-<div class="panel">
-<div id="bot-chat">Bienvenue, humain. Fais ton premier coup si t'oses.</div>
-<div style="margin-top:12px;display:flex;gap:8px;align-items:center">
-<label style="color:#bfc3c6">Niveau :</label>
-<select id="level">
-<option value="2">Facile</option>
-<option value="5" selected>Moyen</option>
-<option value="10">Fort</option>
-<option value="20">Tueur</option>
-</select>
-</div>
-</div>
-<div class="panel" style="margin-top:12px">
-<h3 style="margin-top:0">Historique</h3>
-<pre id="history">Partie non commencée.</pre>
-</div>
-</div>
+  <div class="left">
+    <div id="board-container">
+      <div class="chessboard" id="chessboard"></div>
+    </div>
+    <div class="controls">
+      <button id="newBtn">🔄 Nouvelle partie</button>
+      <button id="undoBtn" class="secondary">↩️ Annuler coup</button>
+      <button id="flipBtn" class="secondary">🔃 Retourner</button>
+    </div>
+  </div>
+  
+  <div class="right">
+    <div class="panel">
+      <div id="bot-chat">Bienvenue, humain. Fais ton premier coup si t'oses.</div>
+      <div class="level-control">
+        <label>Niveau :</label>
+        <select id="level">
+          <option value="1">😴 Facile</option>
+          <option value="3" selected>🤔 Moyen</option>
+          <option value="6">😈 Difficile</option>
+          <option value="10">💀 Tueur</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <h3>📜 Historique</h3>
+      <pre id="history">Partie non commencée.</pre>
+    </div>
+  </div>
 </div>
 <footer>Projet pour s'amuser — hébergé sur GitHub Pages</footer>
 
