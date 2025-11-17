@@ -1,82 +1,70 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bot d'Échecs Insolent</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css" />
-  <style>
-    body {
-      background: #1e1e1e;
-      color: #fafafa;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-    h1 {
-      margin-bottom: 20px;
-    }
-    #board {
-      width: 400px;
-      margin-bottom: 20px;
-    }
-    #bot-chat {
-      background: #2a2a2a;
-      padding: 15px;
-      border-radius: 8px;
-      width: 400px;
-      min-height: 100px;
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bot d'Échecs Insolent</title>
+<link rel="stylesheet" href="css/chessboard.css">
+<style>
+:root{--bg:#111;--panel:#1e1e1e;--muted:#bfc3c6}
+html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:Inter, system-ui, Arial}
+.container{max-width:980px;margin:0 auto;padding:28px;display:flex;gap:28px;align-items:flex-start;justify-content:center}
+.left{width:420px}
+h1{font-size:28px;margin:0 0 12px;text-align:center}
+#board{width:100%;box-shadow:0 6px 18px rgba(0,0,0,0.6);border-radius:8px;background:#222;padding:12px}
+.panel{background:var(--panel);padding:14px;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,0.5)}
+#bot-chat{min-height:120px;padding:14px;border-radius:8px;background:#2a2a2a;color:var(--muted);font-size:15px}
+.controls{display:flex;gap:8px;margin-top:12px}
+button{background:#3b82f6;border:0;padding:8px 12px;border-radius:8px;color:#fff;cursor:pointer}
+button.secondary{background:#6b7280}
+.right{flex:1}
+pre{white-space:pre-wrap;word-break:break-word}
+footer{text-align:center;color:#9aa0a6;margin-top:28px;font-size:13px}
+@media(max-width:880px){.container{flex-direction:column;align-items:center}.left{width:320px}}
+</style>
 </head>
 <body>
-  <h1>Bot d'Échecs Insolent</h1>
-  <div id="board"></div>
-  <div id="bot-chat">Bienvenue, humain. Fais ton premier coup si t'oses.</div>
+<h1 style="text-align:center;margin-top:14px">Bot d'Échecs Insolent</h1>
+<div class="container">
+<div class="left">
+<div id="board" class="panel"></div>
+<div class="controls">
+<button id="newBtn">Nouvelle partie</button>
+<button id="undoBtn" class="secondary">Annuler coup</button>
+<button id="flipBtn" class="secondary">Retourner</button>
+</div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chess.js@0.13.4/dist/chess.min.js""></script>
-  <script src="https://cdn.jsdelivr.net/npm/chessboardjs@1.0.0/www/js/chessboard.js""></script>
 
-  <script>
-    const game = new Chess();
+<div class="right">
+<div class="panel">
+<div id="bot-chat">Bienvenue, humain. Fais ton premier coup si t'oses.</div>
+<div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+<label style="color:#bfc3c6">Niveau :</label>
+<select id="level">
+<option value="2">Facile</option>
+<option value="5" selected>Moyen</option>
+<option value="10">Fort</option>
+<option value="20">Tueur</option>
+</select>
+</div>
+</div>
 
-    const chat = (msg) => {
-      document.getElementById('bot-chat').innerText = msg;
-    };
 
-    let board = Chessboard('board', {
-      draggable: true,
-      position: 'start',
-      onDrop: (source, target) => {
-        const move = game.move({ from: source, to: target, promotion: 'q' });
-        if (!move) return 'snapback';
+<div class="panel" style="margin-top:12px">
+<h3 style="margin-top:0">Historique</h3>
+<pre id="history">Partie non commencée.</pre>
+</div>
+</div>
+</div>
 
-        setTimeout(botMove, 300);
-      }
-    });
 
-    function botMove() {
-      const moves = game.moves();
-      if (moves.length === 0) {
-        chat("Fin de partie. J'espère que tu joues mieux à d'autres jeux, champion.");
-        return;
-      }
+<footer>Projet pour s'amuser — hébergé sur GitHub Pages</footer>
 
-      const move = moves[Math.floor(Math.random() * moves.length)];
-      game.move(move);
-      board.position(game.fen());
 
-      const taunts = [
-        "Voilà, simple et efficace. Contrairement à toi.",
-        "J'espère que t'as un plan. Moi j'en ai 12.",
-        "T’inquiète, tu t'amélioreras… un jour.",
-        "Oh intéressant… non je rigole.",
-        "Je pourrais jouer les yeux fermés là."
-      ];
-      chat(taunts[Math.floor(Math.random() * taunts.length)]);
-    }
-  </script>
+<!-- Librairies : ces fichiers doivent exister localement dans /js -->
+<script src="js/chess.js"></script>
+<script src="js/chessboard.js"></script>
+<script src="js/bot.js"></script>
 </body>
 </html>
