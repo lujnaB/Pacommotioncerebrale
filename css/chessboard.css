@@ -1,1 +1,9 @@
-
+/* Minimal CSS extrait et adapté pour chessboard.js display */
+.chessboard { position: relative; user-select: none; -webkit-user-select:none }
+.chessboard .board { width: 100%; height: auto; position: relative }
+.chessboard .square-55d63 { width: 12.5%; float: left; height: 0; padding-bottom: 12.5%; position: relative }
+.chessboard .square-55d63.dark { background: #87966b }
+.chessboard .square-55d63.light { background: #f0d9b5 }
+.chessboard .piece { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center }
+/* basic responsive */
+#board { max-width: 420px }
