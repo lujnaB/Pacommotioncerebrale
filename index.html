@@ -1,1 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bot d'Échecs Insolent</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css" />
+  <style>
+    body {
+      background: #1e1e1e;
+      color: #fafafa;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    #board {
+      width: 400px;
+      margin-bottom: 20px;
+    }
+    #bot-chat {
+      background: #2a2a2a;
+      padding: 15px;
+      border-radius: 8px;
+      width: 400px;
+      min-height: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bot d'Échecs Insolent</h1>
+  <div id="board"></div>
+  <div id="bot-chat">Bienvenue, humain. Fais ton premier coup si t'oses.</div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+
+  <script>
+    const game = new Chess();
+
+    const chat = (msg) => {
+      document.getElementById('bot-chat').innerText = msg;
+    };
+
+    let board = Chessboard('board', {
+      draggable: true,
+      position: 'start',
+      onDrop: (source, target) => {
+        const move = game.move({ from: source, to: target, promotion: 'q' });
+        if (!move) return 'snapback';
+
+        setTimeout(botMove, 300);
+      }
+    });
+
+    function botMove() {
+      const moves = game.moves();
+      if (moves.length === 0) {
+        chat("Fin de partie. J'espère que tu joues mieux à d'autres jeux, champion.");
+        return;
+      }
+
+      const move = moves[Math.floor(Math.random() * moves.length)];
+      game.move(move);
+      board.position(game.fen());
+
+      const taunts = [
+        "Voilà, simple et efficace. Contrairement à toi.",
+        "J'espère que t'as un plan. Moi j'en ai 12.",
+        "T’inquiète, tu t'amélioreras… un jour.",
+        "Oh intéressant… non je rigole.",
+        "Je pourrais jouer les yeux fermés là."
+      ];
+      chat(taunts[Math.floor(Math.random() * taunts.length)]);
+    }
+  </script>
+</body>
+</html>
