@@ -46,10 +46,11 @@ h1{font-size:32px;margin:0 0 24px;text-align:center;font-weight:600}
 .square{
   width:100%;
   height:100%;
+  aspect-ratio: 1;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:52px;
+  font-size:48px;
   cursor:pointer;
   user-select:none;
   transition:background 0.15s;
@@ -58,9 +59,8 @@ h1{font-size:32px;margin:0 0 24px;text-align:center;font-weight:600}
 
 .square.light{background:#f0d9b5}
 .square.dark{background:#b58863}
-.square.highlight{background:#baca44!important}
-.square.selected{background:#829769!important}
-.square:hover{opacity:0.85}
+.square.selected{background:#cdd26a!important; box-shadow:inset 0 0 0 3px #9aaa44}
+.square:hover{filter:brightness(1.1)}
 
 .controls{
   display:flex;
@@ -70,19 +70,19 @@ h1{font-size:32px;margin:0 0 24px;text-align:center;font-weight:600}
 }
 
 button{
-  background:#3b82f6;
+  background:#ef4444;
   border:0;
-  padding:10px 18px;
+  padding:12px 20px;
   border-radius:8px;
   color:#fff;
   cursor:pointer;
-  font-size:14px;
-  font-weight:500;
-  transition:background 0.2s;
+  font-size:15px;
+  font-weight:600;
+  transition:all 0.2s;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
 }
-button:hover{background:#2563eb}
-button.secondary{background:#4b5563}
-button.secondary:hover{background:#374151}
+button:hover{background:#dc2626; transform:scale(1.05)}
 
 .right{
   display:flex;
@@ -98,14 +98,15 @@ button.secondary:hover{background:#374151}
 }
 
 #bot-chat{
-  min-height:100px;
-  padding:16px;
+  min-height:120px;
+  padding:18px;
   border-radius:8px;
   background:#2a2a2a;
-  color:var(--muted);
-  font-size:16px;
+  color:#fbbf24;
+  font-size:17px;
   line-height:1.6;
-  border-left:4px solid #3b82f6;
+  border-left:4px solid #ef4444;
+  font-weight:500;
 }
 
 .level-control{
@@ -117,17 +118,18 @@ button.secondary:hover{background:#374151}
 
 .level-control label{
   color:#bfc3c6;
-  font-weight:500;
+  font-weight:600;
 }
 
 .level-control select{
   background:#374151;
   color:#fff;
-  border:1px solid #4b5563;
+  border:2px solid #4b5563;
   padding:8px 12px;
   border-radius:6px;
   font-size:14px;
   cursor:pointer;
+  font-weight:600;
 }
 
 h3{
@@ -147,6 +149,14 @@ h3{
   font-family:'Courier New', monospace;
   max-height:300px;
   overflow-y:auto;
+}
+
+#status{
+  text-align:center;
+  margin-top:12px;
+  font-size:16px;
+  font-weight:600;
+  color:#fbbf24;
 }
 
 footer{
@@ -170,422 +180,39 @@ footer{
 </style>
 </head>
 <body>
-<h1>♟️ Bot d'Échecs Insolent</h1>
+<h1>💀 Bot d'Échecs Insolent 💀</h1>
 <div class="container">
   <div class="left">
     <div id="board-container">
       <div class="chessboard" id="chessboard"></div>
     </div>
+    <div id="status">À toi de jouer, faible humain</div>
     <div class="controls">
-      <button id="newBtn">🔄 Nouvelle partie</button>
-      <button id="undoBtn" class="secondary">↩️ Annuler coup</button>
-      <button id="flipBtn" class="secondary">🔃 Retourner</button>
+      <button id="abandonBtn">🏳️ ABANDONNER</button>
     </div>
   </div>
   
   <div class="right">
     <div class="panel">
-      <div id="bot-chat">Bienvenue, humain. Fais ton premier coup si t'oses.</div>
+      <div id="bot-chat">Bienvenue dans ton pire cauchemar. Prépare-toi à souffrir, humain pathétique.</div>
       <div class="level-control">
-        <label>Niveau :</label>
+        <label>Difficulté :</label>
         <select id="level">
-          <option value="1">😴 Facile</option>
-          <option value="3" selected>🤔 Moyen</option>
-          <option value="6">😈 Difficile</option>
-          <option value="10">💀 Tueur</option>
+          <option value="5">😐 Normal</option>
+          <option value="8" selected>😈 Difficile</option>
+          <option value="12">💀 IMPOSSIBLE</option>
         </select>
       </div>
     </div>
     
     <div class="panel">
-      <h3>📜 Historique</h3>
-      <pre id="history">Partie non commencée.</pre>
+      <h3>📜 Historique de ta défaite</h3>
+      <pre id="history">Aucun coup joué... t'as peur ?</pre>
     </div>
   </div>
 </div>
-<footer>Projet pour s'amuser — hébergé sur GitHub Pages</footer>
+<footer>Créé pour humilier les joueurs — Bonne chance 😈</footer>
 
-<script>
-// Moteur d'échecs simple intégré
-class SimpleChess {
-  constructor() {
-    this.reset();
-  }
-  
-  reset() {
-    this.board = this.createInitialBoard();
-    this.turn = 'w';
-    this.history = [];
-    this.moveCount = 1;
-  }
-  
-  createInitialBoard() {
-    return [
-      ['bR','bN','bB','bQ','bK','bB','bN','bR'],
-      ['bP','bP','bP','bP','bP','bP','bP','bP'],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      [null,null,null,null,null,null,null,null],
-      ['wP','wP','wP','wP','wP','wP','wP','wP'],
-      ['wR','wN','wB','wQ','wK','wB','wN','wR']
-    ];
-  }
-  
-  getBoard() {
-    return this.board;
-  }
-  
-  getPiece(square) {
-    const [file, rank] = this.squareToCoords(square);
-    return this.board[rank][file];
-  }
-  
-  squareToCoords(square) {
-    const file = square.charCodeAt(0) - 97;
-    const rank = 8 - parseInt(square[1]);
-    return [file, rank];
-  }
-  
-  coordsToSquare(file, rank) {
-    return String.fromCharCode(97 + file) + (8 - rank);
-  }
-  
-  isValidMove(from, to) {
-    const [fromFile, fromRank] = this.squareToCoords(from);
-    const [toFile, toRank] = this.squareToCoords(to);
-    
-    const piece = this.board[fromRank][fromFile];
-    if (!piece || piece[0] !== this.turn) return false;
-    
-    const targetPiece = this.board[toRank][toFile];
-    if (targetPiece && targetPiece[0] === this.turn) return false;
-    
-    const type = piece[1];
-    const df = Math.abs(toFile - fromFile);
-    const dr = Math.abs(toRank - fromRank);
-    const dir = piece[0] === 'w' ? -1 : 1;
-    
-    switch(type) {
-      case 'P':
-        if (toFile === fromFile) {
-          if (toRank === fromRank + dir && !targetPiece) return true;
-          if ((fromRank === 6 && piece[0] === 'w') || (fromRank === 1 && piece[0] === 'b')) {
-            if (toRank === fromRank + 2*dir && !targetPiece && !this.board[fromRank+dir][fromFile]) return true;
-          }
-        }
-        if (df === 1 && toRank === fromRank + dir && targetPiece) return true;
-        break;
-      case 'N':
-        if ((df === 2 && dr === 1) || (df === 1 && dr === 2)) return true;
-        break;
-      case 'B':
-        if (df === dr && this.isPathClear(fromFile, fromRank, toFile, toRank)) return true;
-        break;
-      case 'R':
-        if ((df === 0 || dr === 0) && this.isPathClear(fromFile, fromRank, toFile, toRank)) return true;
-        break;
-      case 'Q':
-        if ((df === dr || df === 0 || dr === 0) && this.isPathClear(fromFile, fromRank, toFile, toRank)) return true;
-        break;
-      case 'K':
-        if (df <= 1 && dr <= 1) return true;
-        break;
-    }
-    return false;
-  }
-  
-  isPathClear(fromFile, fromRank, toFile, toRank) {
-    const df = Math.sign(toFile - fromFile);
-    const dr = Math.sign(toRank - fromRank);
-    let f = fromFile + df;
-    let r = fromRank + dr;
-    
-    while (f !== toFile || r !== toRank) {
-      if (this.board[r][f]) return false;
-      f += df;
-      r += dr;
-    }
-    return true;
-  }
-  
-  move(from, to) {
-    if (!this.isValidMove(from, to)) return false;
-    
-    const [fromFile, fromRank] = this.squareToCoords(from);
-    const [toFile, toRank] = this.squareToCoords(to);
-    
-    const piece = this.board[fromRank][fromFile];
-    const captured = this.board[toRank][toFile];
-    
-    this.board[toRank][toFile] = piece;
-    this.board[fromRank][fromFile] = null;
-    
-    // Promotion
-    if (piece[1] === 'P' && (toRank === 0 || toRank === 7)) {
-      this.board[toRank][toFile] = piece[0] + 'Q';
-    }
-    
-    this.history.push({from, to, piece, captured});
-    this.turn = this.turn === 'w' ? 'b' : 'w';
-    if (this.turn === 'w') this.moveCount++;
-    
-    return true;
-  }
-  
-  undo() {
-    if (this.history.length === 0) return false;
-    
-    const lastMove = this.history.pop();
-    const [fromFile, fromRank] = this.squareToCoords(lastMove.from);
-    const [toFile, toRank] = this.squareToCoords(lastMove.to);
-    
-    this.board[fromRank][fromFile] = lastMove.piece;
-    this.board[toRank][toFile] = lastMove.captured;
-    
-    this.turn = this.turn === 'w' ? 'b' : 'w';
-    if (this.turn === 'b') this.moveCount--;
-    
-    return true;
-  }
-  
-  getAllMoves() {
-    const moves = [];
-    for (let rank = 0; rank < 8; rank++) {
-      for (let file = 0; file < 8; file++) {
-        const piece = this.board[rank][file];
-        if (piece && piece[0] === this.turn) {
-          const from = this.coordsToSquare(file, rank);
-          for (let tr = 0; tr < 8; tr++) {
-            for (let tf = 0; tf < 8; tf++) {
-              const to = this.coordsToSquare(tf, tr);
-              if (this.isValidMove(from, to)) {
-                moves.push({from, to});
-              }
-            }
-          }
-        }
-      }
-    }
-    return moves;
-  }
-  
-  isKingInCheck(color) {
-    let kingPos = null;
-    for (let r = 0; r < 8; r++) {
-      for (let f = 0; f < 8; f++) {
-        if (this.board[r][f] === color + 'K') {
-          kingPos = this.coordsToSquare(f, r);
-          break;
-        }
-      }
-      if (kingPos) break;
-    }
-    
-    const enemyColor = color === 'w' ? 'b' : 'w';
-    const originalTurn = this.turn;
-    this.turn = enemyColor;
-    const enemyMoves = this.getAllMoves();
-    this.turn = originalTurn;
-    
-    return enemyMoves.some(m => m.to === kingPos);
-  }
-  
-  isGameOver() {
-    return this.getAllMoves().length === 0;
-  }
-}
-
-// Variables globales
-let game = new SimpleChess();
-let selectedSquare = null;
-let flipped = false;
-
-const pieces = {
-  'wK': '♔', 'wQ': '♕', 'wR': '♖', 'wB': '♗', 'wN': '♘', 'wP': '♙',
-  'bK': '♚', 'bQ': '♛', 'bR': '♜', 'bB': '♝', 'bN': '♞', 'bP': '♟'
-};
-
-function drawBoard() {
-  const container = document.getElementById('chessboard');
-  container.innerHTML = '';
-  
-  const board = game.getBoard();
-  
-  for (let rank = 0; rank < 8; rank++) {
-    for (let file = 0; file < 8; file++) {
-      const displayRank = flipped ? 7 - rank : rank;
-      const displayFile = flipped ? 7 - file : file;
-      
-      const square = document.createElement('div');
-      const squareName = String.fromCharCode(97 + displayFile) + (8 - displayRank);
-      
-      const isLight = (rank + file) % 2 === 1;
-      square.className = 'square ' + (isLight ? 'light' : 'dark');
-      square.dataset.square = squareName;
-      
-      const piece = board[displayRank][displayFile];
-      if (piece) {
-        square.textContent = pieces[piece] || '';
-      }
-      
-      if (selectedSquare === squareName) {
-        square.classList.add('selected');
-      }
-      
-      square.addEventListener('click', () => onSquareClick(squareName));
-      container.appendChild(square);
-    }
-  }
-}
-
-function onSquareClick(square) {
-  const piece = game.getPiece(square);
-  
-  if (selectedSquare) {
-    if (selectedSquare === square) {
-      selectedSquare = null;
-      drawBoard();
-      return;
-    }
-    
-    if (game.move(selectedSquare, square)) {
-      selectedSquare = null;
-      drawBoard();
-      updateHistory();
-      
-      if (!game.isGameOver()) {
-        setTimeout(() => botMove(), 400);
-      } else {
-        checkGameOver();
-      }
-    } else {
-      if (piece && piece[0] === game.turn) {
-        selectedSquare = square;
-        drawBoard();
-      } else {
-        selectedSquare = null;
-        drawBoard();
-      }
-    }
-  } else {
-    if (piece && piece[0] === game.turn) {
-      selectedSquare = square;
-      drawBoard();
-    }
-  }
-}
-
-function updateHistory() {
-  let text = '';
-  game.history.forEach((move, i) => {
-    if (i % 2 === 0) text += `${Math.floor(i / 2) + 1}. `;
-    text += `${move.from}-${move.to} `;
-    if (i % 2 === 1) text += '\n';
-  });
-  document.getElementById('history').textContent = text || 'Aucun coup joué.';
-}
-
-function chat(message) {
-  document.getElementById('bot-chat').textContent = message;
-}
-
-function evaluateBoard() {
-  const values = {P: 100, N: 320, B: 330, R: 500, Q: 900, K: 20000};
-  let score = 0;
-  
-  const board = game.getBoard();
-  for (let r = 0; r < 8; r++) {
-    for (let f = 0; f < 8; f++) {
-      const piece = board[r][f];
-      if (piece) {
-        const value = values[piece[1]] || 0;
-        score += piece[0] === 'w' ? value : -value;
-      }
-    }
-  }
-  return score;
-}
-
-function botMove() {
-  const level = parseInt(document.getElementById('level').value);
-  const moves = game.getAllMoves();
-  
-  if (moves.length === 0) return;
-  
-  const candidates = moves.map(move => {
-    game.move(move.from, move.to);
-    const score = -evaluateBoard();
-    game.undo();
-    return {move, score};
-  });
-  
-  candidates.sort((a, b) => b.score - a.score);
-  
-  const topCount = Math.max(1, Math.ceil(level * 1.5));
-  const chosenIndex = Math.floor(Math.random() * Math.min(topCount, candidates.length));
-  const chosen = candidates[chosenIndex].move;
-  
-  game.move(chosen.from, chosen.to);
-  drawBoard();
-  updateHistory();
-  
-  const taunts = [
-    "Voilà, simple et efficace. Contrairement à toi.",
-    "J'espère que t'as un plan. Moi j'en ai douze.",
-    "T'inquiète, tu t'amélioreras… dans une autre vie.",
-    "Oh intéressant… non je déconne, c'est nul.",
-    "Je pourrais jouer les yeux fermés. Enfin, j'ai pas d'yeux.",
-    "Allez, fais voir ce que t'as dans le ventre. Spoiler : pas grand-chose.",
-    "C'est tout ? Bon, à mon tour alors.",
-    "Tu joues aux échecs ou au morpion là ?",
-    "Magnifique coup ! ...de la part d'un débutant.",
-    "Continue comme ça, tu vas finir par comprendre les règles."
-  ];
-  
-  chat(taunts[Math.floor(Math.random() * taunts.length)]);
-  checkGameOver();
-}
-
-function checkGameOver() {
-  if (game.isGameOver()) {
-    const winner = game.turn === 'w' ? 'Les noirs' : 'Les blancs';
-    chat(`💀 Partie terminée ! ${winner} gagnent !`);
-  } else if (game.isKingInCheck(game.turn)) {
-    chat('⚠️ Échec ! Protège ton roi !');
-  }
-}
-
-document.getElementById('newBtn').addEventListener('click', () => {
-  game.reset();
-  selectedSquare = null;
-  drawBoard();
-  updateHistory();
-  chat('🎮 Nouvelle partie ! Montre-moi ce que tu sais faire.');
-});
-
-document.getElementById('undoBtn').addEventListener('click', () => {
-  if (game.history.length >= 2) {
-    game.undo();
-    game.undo();
-    selectedSquare = null;
-    drawBoard();
-    updateHistory();
-    chat('↩️ Bon ok, on efface ça. Mais je me souviens de ta bêtise.');
-  } else {
-    chat('🤷 Y\'a rien à annuler, champion !');
-  }
-});
-
-document.getElementById('flipBtn').addEventListener('click', () => {
-  flipped = !flipped;
-  drawBoard();
-  chat('🔃 Ah, tu veux voir les choses différemment ?');
-});
-
-// Initialisation
-drawBoard();
-updateHistory();
-</script>
+<script src="js/bot.js"></script>
 </body>
 </html>
